@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  apiserver:
+    build: 
+      context: ./
+      dockerfile: service/api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      serv:
+        aliases:
+          - apiserver
+
+  indexer:
+    build: 
+      context: ./
+      dockerfile: ./service/indexer/Dockerfile
+    depends_on:
+      - db
+    networks:
+      serv:
+        aliases:
+          - indexer
+  db:                    
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hw
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./deployment/db:/docker-entrypoint-initdb.d
+    networks:
+      serv:
+        aliases:
+          - db
+
+networks:
+  serv:
+    name: serv
+    driver: bridge
